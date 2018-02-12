@@ -1,3 +1,24 @@
+<script language="javascript">
+
+    $(function () {
+        $("a.show-hide-link").click(function () {
+            var id = $(this).data('id');//'#sub' +
+            //$(id).toggle();
+            if ($('.sublist-' + id).is(":visible")) {
+                $('.sublist-' + id).hide();
+                $('#link-' + id).html('+');
+                $.cookie("mqtt_item-" + id, null);
+            } else {
+                $.cookie("mqtt_item-" + id, "1");
+                $('.sublist-' + id).show();
+                $('#link-' + id).html('-');
+            }
+            return false;
+        });
+    });
+
+
+</script>
 <!-- table zwave_devices search -->
 <div>
  MQTT  <a class="btn btn-default" href="#" onClick="$('#api_settings').toggle();return false;"><#LANG_SETUP#></a> 
@@ -70,39 +91,34 @@
 </form>
 </div>
 
+<br>
+<!-- table mqtt search -->
+<p>
+<a href="?view_mode=edit_mqtt" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> <#LANG_ADD_NEW_RECORD#></a>
+</p>
+
 &nbsp;
 
 <form action="?" method="get" name="frmFilter">
- <div class="row">
-
-  <div class="col-md-3">
-<input type="text" name="title" value="<#TITLE#>" class="form-control" placeholder="<#LANG_SEARCH#>">
-  </div>
-  <div class="col-md-3">
+<table border="0">
+ <tr>
+  <td valign="top"><input type="text" name="title" value="<#TITLE#>" class="form-control" placeholder="<#LANG_SEARCH#>"></td>
+  <td>
   <select class="form-control" name="location_id">
    <option value="0"><#LANG_FILTER_BY_LOCATION#> (<#LANG_ALL#>)
    [#begin LOCATIONS#]
    <option value="[#ID#]"[#if ID="<#LOCATION_ID#>"#] selected[#endif#]>[#TITLE#]
    [#end LOCATIONS#]
   </select>
-  </div>
-  <div class="col-md-2">
+  </td>
+  <td valign="top">
     <input type="submit" name="submit" value="<#LANG_SEARCH#>" class="btn btn-default">
-  </div>
-  <div class="col-md-2">
-   [#if TREE="1"#]
-   <a href="?tree=0" class="btn btn-default"><#LANG_LIST_VIEW#></a>
-   [#else#]
-   <a href="?tree=1" class="btn btn-default"><#LANG_TREE_VIEW#></a>
-   [#endif#]
-  </div>
-  <div class="col-md-2">
-   <a href="?view_mode=edit_mqtt" class="btn btn-default"><i class="glyphicon glyphicon-plus"></i> <#LANG_ADD#></a>
-   <a href="?view_mode=clear_trash" class="btn btn-default" title="Delete not linked topics." onclick="return confirm('<#LANG_ARE_YOU_SURE#>');"><i class="glyphicon glyphicon-floppy-remove"></i> <#LANG_OPTIMIZE#></a>
-  </div>
- </div>
+  </td>
+ </tr>
+</table>
 </form>
-&nbsp;
+
+
 
 <!-- results -->
 [#if RESULT#]
@@ -120,20 +136,8 @@
 [#endif PAGES#]
 <!-- / paging -->
 <!-- search results (list) -->
-[#if TREE="1"#]
-<ul>
- [#begin RESULT#]
- <li style="list-style-type: none">
-  [#if ID!=""#]
-  [#if TITLE!=""#]<b>&bull;</b>&nbsp;[#endif#]<a href="?view_mode=edit_mqtt&id=[#ID#]" title="[#PATH#]">[#if TITLE=""#]<b>&bull;</b>&nbsp;[#else#][#TITLE#][#endif#]</a> <span id="mqtt[#ID#]" class="mqtt_value">[#VALUE#]</span>
-  [#if LINKED_OBJECT!=""#]<i>([#LINKED_OBJECT#].[#LINKED_PROPERTY#])</i>[#endif LINKED_OBJECT#]
-  [#else#]<b>&bull;&nbsp;[#TITLE#]</b>[#endif#]
-  [#if RESULT#]<ul>[#tree RESULT#]</ul>[#endif RESULT#]
- </li>
- [#end RESULT#]
-</ul>
-[#else TREE#]
-<table   class="table table-stripped">
+<form action="?" method="post" name="frmList_mqtt" style="padding:0px" class="form">
+<table class="table" width="100%" border=0>
 <thead>
 <tr>
  <th>
@@ -151,40 +155,36 @@
 </tr>
 </thead>
 <tbody>
-[#begin RESULT#]
-<tr>
- <td>
-  <b>
-   [#TITLE#]
-  </b>[#if PATH!=""#]<br>[#PATH#][#endif#]
-  [#if LINKED_OBJECT!=""#]<br/><i>[#LINKED_OBJECT#].[#LINKED_PROPERTY#]</i>[#endif LINKED_OBJECT#]
- </td>
- <td
-   >
-  [#if UPDATED!=""#]
-   [#UPDATED#]
-  [#else#]
-   &nbsp;
-  [#endif#]
- </td>
- <td
- >
-  <span id="mqtt[#ID#]" class="mqtt_value">[#VALUE#]</span>
-  [#if LINKED_OBJECT!=""#]([#LINKED_OBJECT#].[#LINKED_PROPERTY#])[#endif LINKED_OBJECT#]
- </td>
- <td width="1%" nowrap>
-  
-  [#if "<#ACTION#>"=="admin"#]
-   <a href="?view_mode=edit_mqtt&id=[#ID#]" class="btn btn-default btn-sm" title="<#LANG_EDIT#>"><i class="glyphicon glyphicon-pencil"></i></a>
-    <a href="?view_mode=delete_mqtt&id=[#ID#]" onClick="return confirm('<#ARE_YOU_SURE#>')" class="btn btn-default btn-sm" title="<#LANG_DELETE#>"><i class="glyphicon glyphicon-remove"></i></a>
-  [#endif ACTION#]
-  
- </td>
-</tr>
-[#end RESULT#]
+	[#begin DIR#]
+	<tr class=''>
+		<td style='padding-left:40px' colspan=2>
+		[#if PATH#][#else#]<a href='#' id='link-[#TITLE#]' class='show-hide-link btn btn-default btn-sm expand' data-id='[#TITLE#]'>+</a>[#endif#]
+		<b>[#TITLE#]</b>
+		<br>[#PATH#]
+		[#if DIR#]
+		<table class='table sublist-[#TITLE#]' style="display:none">
+			[#tree DIR#]
+		</table>
+		[#endif#]
+		</td>
+		<td>[#if UPDATED!=""#][#UPDATED#][#else#]&nbsp;[#endif#]</td>
+		<td>[#if VALUE!=""#][#VALUE#][#else#]&nbsp;[#endif#]
+		[#if LINKED_OBJECT!=""#]([#LINKED_OBJECT#].[#LINKED_PROPERTY#])[#endif LINKED_OBJECT#]</td>
+		<td width="1%" nowrap>  
+		  [#if "<#ACTION#>"=="admin"#]
+			[#if PATH#]
+			<a href="?view_mode=edit_mqtt&id=[#ID#]" class="btn btn-default btn-sm" title="<#LANG_EDIT#>"><i class="glyphicon glyphicon-pencil"></i></a>
+			<a href="?view_mode=delete_mqtt&id=[#ID#]" onClick="return confirm('<#ARE_YOU_SURE#>')" class="btn btn-default btn-sm" title="<#LANG_DELETE#>"><i class="glyphicon glyphicon-remove"></i></a>
+			[#else#][#endif#]
+		  [#endif ACTION#]
+		</td>
+	</tr>
+	[#end DIR#]	
 </tbody>
 </table>
-[#endif TREE#]
+<input type="hidden" name="data_source" value="<#DATA_SOURCE#>">
+<input type="hidden" name="view_mode" value="multiple_mqtt">
+</form>
 <!-- / search results (list) -->
 <!-- paging -->
 [#if PAGES#]
@@ -205,33 +205,15 @@
 </p>
 [#endif RESULT#]
 <!-- / results -->
-<script type="text/javascript">
- var valuesUpdateTimeout=0;
- function getLatestValues() {
-  clearTimeout(valuesUpdateTimeout);
-  var ids='';
-  $('.mqtt_value').each(function () {
-   ids+='ids[]='+this.id.replace('mqtt','')+'&';
-  });
-  var url='/ajax/mqtt.html?op=getvalues&'+ids;
-  $.ajax({
-   url: url
-  }).done(function(data) {
-   var obj=jQuery.parseJSON(data);
-   if (obj.DATA.length>0) {
-    for(var i=0;i<obj.DATA.length;i++) {
-     var item_id=obj.DATA[i].ID;
-     var value = obj.DATA[i].VALUE;
-     var oldValue=$('#mqtt'+item_id).html();
-     $('#mqtt'+item_id).html(value);
-     if (value!=oldValue) {
-      $("#mqtt"+item_id).fadeTo(100, 0.1).fadeTo(200, 1.0);
-     }
-    }
-   }
-   valuesUpdateTimeout = setTimeout('getLatestValues()',2000);
-  });
+<script language="javascript">
+[#begin DIR#]
+ if ($.cookie("mqtt_item-[#TITLE#]")) {
+  $('.sublist-[#TITLE#]').show();
+  $('#link-[#TITLE#]').html('-');
  }
- valuesUpdateTimeout = setTimeout('getLatestValues()',2000);
+ [#if DIR#]
+	[#tree DIR#]
+ [#endif DIR#]
+[#end DIR#]
 </script>
 
