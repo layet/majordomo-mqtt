@@ -55,7 +55,7 @@
   // SEARCH RESULTS
   $res=SQLSelect("SELECT * FROM mqtt WHERE $qry ORDER BY ".$sortby_mqtt);
   if ($res[0]['ID']) {
-   paging($res, 50, $out); // search result paging
+   //paging($res, 50, $out); // search result paging
    colorizeArray($res);
    $total=count($res);
    $dir = array();
@@ -75,14 +75,14 @@
 	$level=0;
 	foreach ($dump[$i] as $p) {
 		$exists=0;
-		for ($j=0;$j<count($last);$j++) if (isset($last[$j]['TITLE']) && ($last[$j]['TITLE']==$p)) { $exists=1; break; }
-		if (!$exists) { $last[$j]['TITLE'] = $p; $last[$j]['DIR'] = array(); }
+		for ($j=0;$j<count($last);$j++) if (isset($last[$j]['TITLE']) && ($last[$j]['TITLE']==str_replace('$','', $p))) { $exists=1; break; }
+		if (!$exists) { $last[$j]['TITLE'] = str_replace('$','', $p); $last[$j]['DIR'] = array(); }
 		if ($level!=(count($dump[$i])-1)) $last = & $last[$j]['DIR']; else $last = & $last[$j];
 		$level++;
 	}
 	$last = $res[$i];
    }
-   
+   //$out['TEST'] = var_export($dir, true);
    $out['DIR'] = $dir;
    $out['RESULT']=$res;
   }
